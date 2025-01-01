@@ -1,0 +1,131 @@
+# 
+
+
+
+
+
+services:
+  app:
+    image: lovethomah/laravel-fms:latest
+    container_name: laravel-app
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    volumes:
+      - .:/var/www/html
+      - ./storage:/var/www/html/storage
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_KEY=${APP_KEY}
+      - DB_HOST=laravel-db
+      - DB_PORT=3000
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      - db
+    networks:
+      - laravel-fms_laravel-network
+
+  db:
+    image: mysql:8.0
+    container_name: laravel-db
+    restart: always
+    ports:
+      - "3003:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password   # Set root password
+      MYSQL_DATABASE: ${DB_DATABASE}      # Use environment variable for database name
+      MYSQL_USER: app_user                # Non-root user
+      MYSQL_PASSWORD: app_password        # Non-root user password
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - laravel-fms_laravel-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus1/prometheus.yml
+    networks:
+      - laravel-fms_laravel-network
+
+volumes:
+  db-data:
+
+networks:
+  laravel-fms_laravel-network:
+    driver: bridge
+
+
+
+
+
+
+# services:
+#   app:
+#     image: lovethomah/laravel-fms:1.0
+#     container_name: laravel-app
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     volumes:
+#       - .:/var/www/html
+#       - ./storage:/var/www/html/storage
+#     restart: always
+#     ports:
+#       - "8081:80"
+#     environment:
+#       - APP_KEY=${APP_KEY}
+#       - DB_HOST=${DB_HOST}
+#       - DB_PORT=${DB_PORT}
+#       - DB_DATABASE=${DB_DATABASE}
+#       - DB_USERNAME=${DB_USERNAME}
+#       - DB_PASSWORD=${DB_PASSWORD}
+#     depends_on:
+#       - db
+#     networks:
+#       - laravel-fms_laravel-network
+
+#   db:
+#     image: mysql:8.0
+#     container_name: laravel-db
+#     restart: always
+#     ports:
+#       - "3000:3306"
+#     environment:
+#       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+#       MYSQL_DATABASE: project
+#       MYSQL_USER: ${DB_USERNAME}
+#       MYSQL_PASSWORD: ${DB_PASSWORD}
+#     volumes:
+#       - db-data:/var/lib/mysql
+#     networks:
+#       - laravel-fms_laravel-network
+#   prometheus:
+#      image: prom/prometheus:latest
+#      container_name: prometheus
+#      ports:
+#       - "9091:9090"
+#      volumes:
+#       - ./prometheus/prometheus.yml:/etc/prometheus1/prometheus.yml
+#      networks:
+#       - laravel-fms_laravel-network
+
+# volumes:
+#   db-data:
+
+# networks:
+#   laravel-fms_laravel-network:
+#     driver: bridge
+
+
+      
+

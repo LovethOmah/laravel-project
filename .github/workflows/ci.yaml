@@ -1,0 +1,87 @@
+# name: CI
+
+# on:
+#   push:
+#     branches:
+#       - master
+
+# jobs: 
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       - name: Setup PHP
+#         uses: shivammathur/setup-php@v2
+#         with:
+#           php-version: '8.1'
+    
+#       - name: Install dependencies
+#         run: composer install --prefer-dist --no-progress --no-suggest
+        
+
+
+
+name: Laravel CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  laravel-tests:
+    name: Laravel CI Pipeline
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the code
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Step 2: Set Up PHP and Composer
+    - name: Set up PHP with Composer
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mbstring, bcmath, ctype, json, xml, tokenizer, pdo, fileinfo, curl
+        tools: composer
+    # Verify installation
+    - name: Verify Composer Installation
+      run: composer --version
+
+    # Step 3: Install Laravel Installer Globally
+    - name: Install Laravel globally
+      run: composer global require laravel/installer
+    # Add Composer global bin to path
+    - name: Add Composer Global Bin to PATH
+      run: echo "$HOME/.composer/vendor/bin" >> $GITHUB_PATH
+
+    # Step 4: Install PHP Dependencies
+    - name: Install PHP dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+
+    # Step 5: Set Up .env
+    - name: Set up .env
+      run: cp .env.example .env
+
+    # Step 6: Generate Application Key
+    - name: Generate application key
+      run: php artisan key:generate
+
+    # Step 7: Install Docker
+    - name: Install Docker
+      uses: addnab/docker-run-action@v3
+      with:
+        image: docker:latest
+    # Verify Docker installation
+    - name: Verify Docker Installation
+      run: docker --version
+
+    # Step 8: Run Laravel Tests
+    - name: Run Laravel Tests
+      run: php artisan test
